@@ -1,0 +1,83 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class WeaponController : MonoBehaviour
+{
+    public GameObject trails;
+
+    bool canAttack = true;
+    bool isStafe = false;
+    Animator Anim;
+
+    public GameObject handWeapon;
+    public GameObject backWeapon;
+
+    private void Start()
+    {
+        Anim = GetComponent<Animator>();
+        trailClose();
+    }
+
+    void Update()
+    {
+        Anim.SetBool("İS", isStafe);
+
+        if (Input.GetKeyDown(KeyCode.Mouse0) && isStafe == true && canAttack == true)
+        {
+            Anim.SetTrigger("Saldır");
+
+        }
+
+
+        if (Input.GetKeyDown(KeyCode.F) && Anim.GetBool("isAttack") == false )
+        {
+            isStafe = !isStafe;
+        }
+        if (isStafe == true)
+        {
+            GetComponent<Controller>().harepektTipi = Controller.MovementType.Strafe;
+            GetComponent<İKLook>().azal();
+        }
+
+        if (isStafe == false)
+        {
+            GetComponent<Controller>().harepektTipi = Controller.MovementType.Directional;
+            GetComponent<İKLook>().art();
+        }
+    }
+
+
+
+
+
+
+    void equıp()
+    {
+        backWeapon.SetActive(false);
+        handWeapon.SetActive(true);
+    }
+
+    void unequıp()
+    {
+        backWeapon.SetActive(true);
+        handWeapon.SetActive(false);
+    }
+
+    public void trailOpen()
+    {
+        for (int i = 0; i < trails.transform.childCount; i++)
+        {
+            trails.transform.GetChild(i).gameObject.GetComponent<TrailRenderer>().emitting = true;
+        }
+    }
+
+    public void trailClose()
+    {
+        for (int i = 0; i < trails.transform.childCount; i++)
+        {
+            trails.transform.GetChild(i).gameObject.GetComponent<TrailRenderer>().emitting = false;
+        }
+    }
+
+}
