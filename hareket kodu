@@ -1,0 +1,182 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Controller : MonoBehaviour
+{
+
+    [Header("Metrics")]
+    public float damp;
+    [Range(1, 20)]
+    public float RotationSpeed;
+    float normalFov;
+    public float SprintFov;
+    [Range(1, 20)]
+    public float StrafeTurnSpeed;
+
+    float inputX;   
+    float inputY;
+    float maxSpeed;
+
+    public Transform Model;
+
+    Animator Anim;
+
+    Vector3 StickDrection;
+
+    Camera mainCam;
+
+    public KeyCode SprintButton = KeyCode.LeftShift;
+    public KeyCode WalkButton = KeyCode.Z;
+
+    public enum MovementType
+    {
+        Directional,
+        Strafe
+
+    };
+
+    public MovementType harepektTipi;   
+
+    void Start()
+    {
+        Anim = GetComponent<Animator>();
+        mainCam = Camera.main;
+        normalFov = mainCam.fieldOfView;
+
+    }
+
+    private void LateUpdate()
+    {
+        InputMove();    
+        InputRotation();
+        Movement();
+    }
+
+    void Movement()
+    {
+
+        if (harepektTipi == MovementType.Strafe) 
+        {
+            Anim.SetFloat("IX", inputX, damp, Time.deltaTime * 10);
+            Anim.SetFloat("IY", inputY, damp, Time.deltaTime * 10);
+  
+            var hareketEdiyor = inputX != 0 || inputY != 0;
+
+            if (hareketEdiyor)
+            {
+                float yawCamera = mainCam.transform.rotation.eulerAngles.y;
+                transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(0, yawCamera, 0), StrafeTurnSpeed * Time.fixedDeltaTime);
+                Anim.SetBool("strafemoving", true);
+            }
+            else
+            {
+                Anim.SetBool("strafemoving", false);
+            }
+
+
+
+
+        }
+
+        if (harepektTipi == MovementType.Directional)
+        {
+
+
+            inputX = Input.GetAxis("Horizontal");
+            inputY = Input.GetAxis("Vertical");
+
+            StickDrection = new Vector3(inputX, 0, inputY);
+
+            if (Input.GetKey(SprintButton))
+            {
+                mainCam.fieldOfView = Mathf.Lerp(mainCam.fieldOfView, SprintFov, Time.deltaTime * 2);
+
+                maxSpeed = 2;
+                inputX = 2 * Input.GetAxis("Horizontal");
+                inputY = 2 * Input.GetAxis("Vertical");
+            }
+
+
+            else if (Input.GetKey(WalkButton))
+            {
+                mainCam.fieldOfView = Mathf.Lerp(mainCam.fieldOfView, normalFov, Time.deltaTime * 2);
+
+                maxSpeed = 0.2f;
+                inputX = Input.GetAxis("Horizontal");
+                inputY = Input.GetAxis("Vertical");
+            }
+            else
+            {
+                mainCam.fieldOfView = Mathf.Lerp(mainCam.fieldOfView, normalFov, Time.deltaTime * 2);
+
+                maxSpeed = 1;
+                inputX = Input.GetAxis("Horizontal");
+                inputY = Input.GetAxis("Vertical");
+            }
+
+        }
+
+        void InputMove()
+        {
+            Anim.SetFloat("speed", Vector3.ClampMagnitude(StickDrection, maxSpeed).magnitude, damp, Time.deltaTime * 10);
+
+        }
+
+        void InputRotation()
+        {
+            Vector3 rotOfset = mainCam.transform.TransformDirection(StickDrection);
+            rotOfset.y = 0;
+
+            Model.forward = Vector3.Slerp(Model.forward, rotOfset, Time.deltaTime * RotationSpeed);
+        }
+        inputX = Input.GetAxis("Horizontal");
+        inputY = Input.GetAxis("Vertical");
+
+        StickDrection = new Vector3(inputX, 0, inputY);
+
+        if (Input.GetKey(SprintButton))
+        {
+            mainCam.fieldOfView = Mathf.Lerp(mainCam.fieldOfView, SprintFov, Time.deltaTime * 2);
+
+            maxSpeed = 2;
+            inputX = 2 * Input.GetAxis("Horizontal");
+            inputY = 2 * Input.GetAxis("Vertical");
+        }
+
+
+        else if (Input.GetKey(WalkButton))
+        {
+            mainCam.fieldOfView = Mathf.Lerp(mainCam.fieldOfView, normalFov, Time.deltaTime * 2);
+
+            maxSpeed = 0.2f;
+            inputX = Input.GetAxis("Horizontal");
+            inputY = Input.GetAxis("Vertical");
+        }
+        else
+        {
+            mainCam.fieldOfView = Mathf.Lerp(mainCam.fieldOfView, normalFov, Time.deltaTime * 2);
+
+            maxSpeed = 1;
+            inputX = Input.GetAxis("Horizontal");
+            inputY = Input.GetAxis("Vertical");
+        }
+
+    }
+
+    void InputMove()
+    {
+        Anim.SetFloat("speed", Vector3.ClampMagnitude(StickDrection, maxSpeed).magnitude, damp, Time.deltaTime * 10);
+
+    }
+
+    void InputRotation()
+    {
+        Vector3 rotOfset = mainCam.transform.TransformDirection(StickDrection);
+        rotOfset.y = 0;
+
+        Model.forward = Vector3.Slerp(Model.forward, rotOfset, Time.deltaTime * RotationSpeed);
+    }
+
+
+}
